@@ -1,0 +1,17 @@
+[
+    {
+        "title": "Digital Art Challenge",
+        "desc": "Our community shared over 120+ digital artworks this week!",
+        "image": "./images/community1.jpg"
+    },
+    {
+        "title": "Creative Photography Showcase",
+        "desc": "Stunning shots capturing emotion, light, and perspective.",
+        "image": "./images/community2.jpg"
+    },
+    {
+        "title": "Abstract Expressions",
+        "desc": "Bold, vibrant, and deeply expressive works by new artists.",
+        "image": "./images/community3.jpg"
+    }
+]

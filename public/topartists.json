@@ -1,0 +1,17 @@
+[
+    {
+        "name": "Sanjida Islam Labonno",
+        "image": "./images/female-artist1.jpg",
+        "artworks": 42
+    },
+    {
+        "name": "Liam Carter",
+        "image": "./images/male-artist.jpg",
+        "artworks": 38
+    },
+    {
+        "name": "Elena Rivera",
+        "image": "./images/female-artist.jpg",
+        "artworks": 35
+    }
+]
