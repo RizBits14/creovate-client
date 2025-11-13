@@ -7,6 +7,7 @@ import Register from "../Pages/Register.jsx";
 import PrivateRoute from "../Routes/PrivateRoute.jsx";
 import ArtworkDetails from "../Pages/ArtworkDetails.jsx";
 import AddArtwork from "../Pages/AddArtwork.jsx";
+import MyGallery from "../Pages/MyGallery.jsx";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,14 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: "/my-gallery",
+        element: (
+          <PrivateRoute>
+            <MyGallery />
+          </PrivateRoute>
+        )
+      }
     ],
   },
 ]);

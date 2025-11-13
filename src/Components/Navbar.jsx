@@ -37,21 +37,17 @@ const Navbar = () => {
                         Explore Artworks
                     </NavLink>
 
-                    {user && (
-                        <>
-                            <NavLink to="/add-art" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
-                                Add Artwork
-                            </NavLink>
+                    <NavLink to="/add-art" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
+                        Add Artwork
+                    </NavLink>
 
-                            <NavLink to="/my-gallery" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
-                                My Gallery
-                            </NavLink>
+                    <NavLink to="/my-gallery" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
+                        My Gallery
+                    </NavLink>
 
-                            <NavLink to="/favorites" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
-                                My Favorites
-                            </NavLink>
-                        </>
-                    )}
+                    <NavLink to="/favorites" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
+                        My Favorites
+                    </NavLink>
                 </div>
 
                 <div className="hidden md:flex items-center space-x-3">
