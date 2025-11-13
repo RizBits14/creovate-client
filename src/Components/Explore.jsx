@@ -110,7 +110,7 @@ const Explore = () => {
 
                                 <Link to={`/art/${art._id}`}>
                                     <button
-                                        className="mt-5 w-full px-4 py-2 rounded-xl bg-linear-to-r from-[#6C63FF] to-[#FF6584] text-white text-sm font-medium hover:opacity-90 transition">
+                                        className="mt-5 w-full px-4 py-2 rounded-xl bg-linear-to-r from-[#6C63FF] to-[#FF6584] text-white text-sm font-medium hover:opacity-90 transition cursor-pointer">
                                         View Details
                                     </button>
                                 </Link>

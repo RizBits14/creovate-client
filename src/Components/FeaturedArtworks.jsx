@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const FeaturedArtworks = () => {
     const [artworks, setArtworks] = useState([]);
@@ -37,7 +38,7 @@ const FeaturedArtworks = () => {
                 {artworks.map((art) => (
                     <div key={art._id} className="group rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1  transition-all duration-300  bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <div className="overflow-hidden">
-                            <img src={art.image} alt={art.title} className="h-64 w-full object-cover rounded-t-3xl group-hover:scale-105 transition-transform duration-500"/>
+                            <img src={art.image} alt={art.title} className="h-64 w-full object-cover rounded-t-3xl group-hover:scale-105 transition-transform duration-500" />
                         </div>
 
                         <div className="p-6">
@@ -47,9 +48,12 @@ const FeaturedArtworks = () => {
                             <p className="text-gray-600 dark:text-gray-300 mt-1">{art.artist}</p>
                             <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">{art.category}</p>
 
-                            <button className="mt-5 w-full px-5 py-2.5 text-sm rounded-xl  bg-linear-to-r from-[#6C63FF] to-[#FF6584]  text-white font-medium shadow-md hover:shadow-lg hover:opacity-95  transition-all duration-300">
-                                View Details
-                            </button>
+                            <Link to={`/art/${art._id}`}>
+                                <button className="mt-5 w-full px-5 py-2.5 text-sm rounded-xl   bg-linear-to-r from-[#6C63FF] to-[#FF6584]  text-white font-medium shadow-md hover:shadow-lg hover:opacity-95 transition-all duration-300 cursor-pointer">
+                                    View Details
+                                </button>
+                            </Link>
+
                         </div>
                     </div>
                 ))}
