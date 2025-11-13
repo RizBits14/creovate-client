@@ -1,32 +1,33 @@
-import { createBrowserRouter } from 'react-router';
-import HomePageLayout from '../Layout/HomePageLayout.jsx';
-import Home from '../Pages/Home.jsx';
-import Explore from '../Components/Explore.jsx';
-import Login from '../Pages/Login.jsx';
-import Register from '../Pages/Register.jsx';
+import { createBrowserRouter } from "react-router-dom";
+import HomePageLayout from "../Layout/HomePageLayout.jsx";
+import Home from "../Pages/Home.jsx";
+import Explore from "../Components/Explore.jsx";
+import Login from "../Pages/Login.jsx";
+import Register from "../Pages/Register.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: HomePageLayout,
-    children:[
+    element: <HomePageLayout />,
+    children: [
       {
-        path:'/',
-        Component: Home
+        path: "/",
+        element: <Home />,
       },
       {
-        path:'/explore',
-        Component: Explore
+        path: "/explore",
+        element: <Explore />,
       },
       {
-        path:'/login',
-        Component: Login
+        path: "/login",
+        element: <Login />,
       },
       {
-        path:'/register',
-        Component: Register
-      }
-    ]
+        path: "/register",
+        element: <Register />,
+      },
+    ],
   },
 ]);
+
 export default router;

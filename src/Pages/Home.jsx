@@ -4,7 +4,7 @@ import FeaturedArtworks from '../Components/FeaturedArtworks';
 
 const Home = () => {
     return (
-        <div>
+        <div className='overflow-x-hidden w-full'>
             <SliderBanner></SliderBanner>
             <FeaturedArtworks></FeaturedArtworks>
         </div>
