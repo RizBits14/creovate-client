@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../Provider/AuthProvider";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
+import { AuthContext } from "../Provider/AuthContext";
 
 const Register = () => {
     const { register, googleLogin } = useContext(AuthContext);
