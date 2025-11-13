@@ -6,33 +6,31 @@ import Login from "../Pages/Login.jsx";
 import Register from "../Pages/Register.jsx";
 import PrivateRoute from "../Routes/PrivateRoute.jsx";
 import ArtworkDetails from "../Pages/ArtworkDetails.jsx";
+import AddArtwork from "../Pages/AddArtwork.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePageLayout />,
     children: [
+      { path: "/", element: <Home /> },
+      { path: "/explore", element: <Explore /> },
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <Register /> },
+
       {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/explore",
-        element: <Explore />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-      {
-        path: "/art/:id", 
+        path: "/art/:id",
         element: (
           <PrivateRoute>
             <ArtworkDetails />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/add-art",
+        element: (
+          <PrivateRoute>
+            <AddArtwork />
           </PrivateRoute>
         ),
       },
