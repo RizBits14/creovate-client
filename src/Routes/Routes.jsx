@@ -9,6 +9,7 @@ import ArtworkDetails from "../Pages/ArtworkDetails.jsx";
 import AddArtwork from "../Pages/AddArtwork.jsx";
 import MyGallery from "../Pages/MyGallery.jsx";
 import MyFavourites from "../Pages/MyFavourites.jsx";
+import Error404Page from "../Pages/Error404Page.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,7 @@ const router = createBrowserRouter([
           <PrivateRoute>
             <MyGallery />
           </PrivateRoute>
-        )
+        ),
       },
       {
         path: "/favourites",
@@ -50,9 +51,13 @@ const router = createBrowserRouter([
           <PrivateRoute>
             <MyFavourites />
           </PrivateRoute>
-        )
-      }
+        ),
+      },
     ],
+  },
+  {
+    path: "/*",
+    element: <Error404Page />,
   },
 ]);
 
