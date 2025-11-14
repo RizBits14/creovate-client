@@ -68,8 +68,8 @@ const MyGallery = () => {
                         <img src={art.image} alt={art.title} className="h-64 w-full object-cover"/>
 
                         <div className="p-5">
-                            <h3 className="text-xl font-semibold">{art.title}</h3>
-                            <p className="text-gray-600 dark:text-gray-300">{art.category}</p>
+                            <h3 className="text-xl font-semibold text-white">Title: {art.title}</h3>
+                            <p className="text-gray-600 dark:text-gray-300">Category: {art.category}</p>
 
                             <div className="mt-5 flex justify-between">
                                 <button className="btn btn-sm rounded-full bg-indigo-500 text-white" onClick={() => openEditModal(art)}>

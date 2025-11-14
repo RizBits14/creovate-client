@@ -131,14 +131,14 @@ const AddArtwork = () => {
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
                             Artist Name
                         </label>
-                        <input type="text" value={user?.displayName || ""} readOnly className="input input-bordered w-full rounded-xl bg-gray-100 dark:bg-gray-800"/>
+                        <input type="text" value={user?.displayName || ""} readOnly className="input input-bordered w-full rounded-xl bg-gray-100 dark:bg-gray-800 text-white"/>
                     </div>
 
                     <div>
                         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
                             Artist Email
                         </label>
-                        <input type="email" value={user?.email || ""} readOnly className="input input-bordered w-full rounded-xl bg-gray-100 dark:bg-gray-800"/>
+                        <input type="email" value={user?.email || ""} readOnly className="input input-bordered w-full rounded-xl bg-gray-100 dark:bg-gray-800 text-white"/>
                     </div>
                 </div>
 

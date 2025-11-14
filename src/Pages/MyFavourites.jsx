@@ -15,7 +15,6 @@ const MyFavourites = () => {
 
         setLoading(true);
 
-        // 1) Get favourites for this user
         fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites?email=${user.email}`)
             .then((res) => res.json())
             .then(async (favs) => {
@@ -25,7 +24,6 @@ const MyFavourites = () => {
                     return;
                 }
 
-                // 2) For each favourite, fetch its artwork
                 const detailed = await Promise.all(
                     favs.map(async (fav) => {
                         try {
@@ -42,7 +40,6 @@ const MyFavourites = () => {
                     })
                 );
 
-                // filter out any nulls
                 setFavItems(detailed.filter((item) => item && item.art && item.art._id));
                 setLoading(false);
             })
@@ -112,14 +109,13 @@ const MyFavourites = () => {
                             />
 
                             <div className="p-5 flex flex-col h-full">
-                                <h3 className="text-xl font-semibold">{art.title}</h3>
+                                <h3 className="text-xl font-semibold text-white">Title: {art.title}</h3>
 
                                 <p className="text-gray-600 dark:text-gray-300">
                                     {art.artist}
                                 </p>
 
-                                <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">
-                                    {art.category}
+                                <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">Category: {art.category}
                                 </p>
 
                                 <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
