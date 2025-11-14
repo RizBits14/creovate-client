@@ -106,7 +106,7 @@ const ArtworkDetails = () => {
 
         setFavLoading(true);
 
-        fetch(`${import.meta.env.VITE_FRONTEND_URL}:3000/favourites`, {
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
