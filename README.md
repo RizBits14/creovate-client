@@ -1,16 +1,28 @@
-# React + Vite
+🎨 Creovate – Online Art Showcase Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Live Website: https://rizbits14-creovate-client.netlify.app/
 
-Currently, two official plugins are available:
+📌 Project Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Creovate is a modern, responsive art-sharing platform where users can explore public artworks, upload their own creations, manage galleries, and interact with other artists. This repository contains the client-side (React) application.
 
-## React Compiler
+⭐ Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🔐 User Authentication using Firebase (Login, Register, Google Login).
+- 🖼️ Artwork Management: Add, edit, delete, and view details of uploaded artworks.
+- ❤️ Favourites System: Save artworks and prevent duplicates.
+- 🌙 Dark/Light Theme Toggle with automatic persistence.
+- 🎞️ Enhanced UI using Swiper Slider, Typewriter animations, and responsive design.
 
-## Expanding the ESLint configuration
+🚀 Technologies Used
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React.js
+- React Router DOM
+- Tailwind CSS + DaisyUI
+- Firebase Authentication
+- Swiper.js, Framer Motion, Typewriter
+- Context API for Auth & Theme
+
+📎 Backend API
+
+This frontend connects to the Node.js backend hosted separately.
