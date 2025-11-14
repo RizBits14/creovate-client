@@ -7,11 +7,12 @@ const ArtworkDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
-
     const [art, setArt] = useState(null);
     const [artistArts, setArtistArts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [likeLoading, setLikeLoading] = useState(false);
+    const [isFavourite, setIsFavourite] = useState(false);
+    const [favLoading, setFavLoading] = useState(false);
 
     useEffect(() => {
         if (!user) {
@@ -23,32 +24,44 @@ const ArtworkDetails = () => {
         if (!id) return;
 
         setLoading(true);
+
         let currentArt = null;
 
         fetch(`http://localhost:3000/arts/${id}`)
-            .then((res) => res.json())
-            .then((data) => {
+            .then(res => res.json())
+            .then(data => {
                 currentArt = data;
                 setArt(data);
 
+                if (user?.email) {
+                    return fetch(`http://localhost:3000/favourites/check?email=${user.email}&artId=${id}`);
+                }
+                return { json: () => ({ exists: false }) };
+            })
+            .then(res => res.json())
+            .then(favData => {
+                if (favData.exists) {
+                    setIsFavourite(true);
+                }
+
                 return fetch("http://localhost:3000/arts?visibility=Public");
             })
-            .then((res) => res.json())
-            .then((allPublicArts) => {
+            .then(res => res.json())
+            .then(allPublicArts => {
                 if (!currentArt) return;
 
                 const sameArtist = allPublicArts.filter(
-                    (a) => a.artist && a.artist === currentArt.artist
+                    a => a.artist === currentArt.artist
                 );
 
                 setArtistArts(sameArtist);
                 setLoading(false);
             })
-            .catch((err) => {
-                console.error("Error fetching artwork/details:", err);
+            .catch(err => {
+                console.error("Error fetching art:", err);
                 setLoading(false);
             });
-    }, [id]);
+    }, [id, user]);
 
     if (loading) {
         return (
@@ -72,14 +85,15 @@ const ArtworkDetails = () => {
         fetch(`http://localhost:3000/arts/${id}/like`, {
             method: "PATCH",
         })
-            .then((res) => res.json())
+            .then(res => res.json())
             .then(() => {
-                setArt({ ...art, likes: (art.likes || 0) + 1 });
+                setArt(prev => ({
+                    ...prev,
+                    likes: (prev.likes || 0) + 1,
+                }));
                 toast.success("You liked this artwork!");
             })
-            .catch(() => {
-                toast.error("Failed to like.");
-            })
+            .catch(() => toast.error("Failed to like."))
             .finally(() => setLikeLoading(false));
     };
 
@@ -87,6 +101,10 @@ const ArtworkDetails = () => {
         if (!user) {
             return navigate("/login", { state: { from: `/art/${id}` } });
         }
+
+        if (isFavourite) return;
+
+        setFavLoading(true);
 
         fetch("http://localhost:3000/favourites", {
             method: "POST",
@@ -96,9 +114,15 @@ const ArtworkDetails = () => {
                 artworkId: id,
             }),
         })
-            .then((res) => res.json())
-            .then(() => toast.success("Added to Favourites!"))
-            .catch(() => toast.error("Failed to add to Favourites"));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success || data.already) {
+                    setIsFavourite(true);
+                    toast.success("Added to favourites!");
+                }
+            })
+            .catch(() => toast.error("Failed to add to favourites"))
+            .finally(() => setFavLoading(false));
     };
 
     return (
@@ -152,6 +176,7 @@ const ArtworkDetails = () => {
                     </p>
 
                     <div className="flex gap-4 mt-5">
+
                         <button
                             onClick={handleLike}
                             disabled={likeLoading}
@@ -164,11 +189,18 @@ const ArtworkDetails = () => {
 
                         <button
                             onClick={handleAddToFavourites}
-                            className="px-5 py-2 rounded-xl text-white font-medium
-                                bg-linear-to-r from-[#6C63FF] to-[#FF6584]
-                                hover:opacity-90 transition cursor-pointer"
+                            disabled={isFavourite || favLoading}
+                            className={`px-5 py-2 rounded-xl text-white font-medium transition 
+                                ${isFavourite
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-linear-to-r from-[#6C63FF] to-[#FF6584] hover:opacity-90"
+                                }`}
                         >
-                            Add to Favourites
+                            {isFavourite
+                                ? "Added ✓"
+                                : favLoading
+                                    ? "Adding..."
+                                    : "Add to Favourites"}
                         </button>
                     </div>
 
