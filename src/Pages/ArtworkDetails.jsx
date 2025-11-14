@@ -7,6 +7,7 @@ const ArtworkDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+
     const [art, setArt] = useState(null);
     const [artistArts, setArtistArts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,24 +20,35 @@ const ArtworkDetails = () => {
     }, [user, id, navigate]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!id) return;
+
+        setLoading(true);
+        let currentArt = null;
 
         fetch(`http://localhost:3000/arts/${id}`)
             .then((res) => res.json())
             .then((data) => {
+                currentArt = data;
                 setArt(data);
-                return fetch(`http://localhost:3000/arts?email=${data.email}`);
+
+                return fetch("http://localhost:3000/arts?visibility=Public");
             })
             .then((res) => res.json())
-            .then((arts) => {
-                setArtistArts(arts);
+            .then((allPublicArts) => {
+                if (!currentArt) return;
+
+                const sameArtist = allPublicArts.filter(
+                    (a) => a.artist && a.artist === currentArt.artist
+                );
+
+                setArtistArts(sameArtist);
                 setLoading(false);
             })
             .catch((err) => {
-                console.error("Error fetching artwork:", err);
+                console.error("Error fetching artwork/details:", err);
                 setLoading(false);
             });
-    }, [id, user]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -47,7 +59,11 @@ const ArtworkDetails = () => {
     }
 
     if (!art) {
-        return <p className="text-center mt-32 text-gray-600">Artwork not found.</p>;
+        return (
+            <p className="text-center mt-32 text-gray-600">
+                Artwork not found.
+            </p>
+        );
     }
 
     const handleLike = () => {
@@ -60,15 +76,18 @@ const ArtworkDetails = () => {
             .then(() => {
                 setArt({ ...art, likes: (art.likes || 0) + 1 });
                 toast.success("You liked this artwork!");
-                setLikeLoading(false);
             })
-        // .catch((err) => {
-        //     toast.error("Failed to like.");
-        //     setLikeLoading(false);
-        // });
+            .catch(() => {
+                toast.error("Failed to like.");
+            })
+            .finally(() => setLikeLoading(false));
     };
 
-    const handleAddToFavorites = () => {
+    const handleAddToFavourites = () => {
+        if (!user) {
+            return navigate("/login", { state: { from: `/art/${id}` } });
+        }
+
         fetch("http://localhost:3000/favourites", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -78,26 +97,31 @@ const ArtworkDetails = () => {
             }),
         })
             .then((res) => res.json())
-            .then(() => toast.success("Added to Favorites!"))
-            .catch(() => toast.error("Failed to add to Favorites"));
+            .then(() => toast.success("Added to Favourites!"))
+            .catch(() => toast.error("Failed to add to Favourites"));
     };
 
     return (
         <div className="mt-28 px-4 md:px-10 max-w-5xl mx-auto">
-
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 bg-clip-text text-transparent bg-linear-to-r  from-[#6C63FF] via-[#FF6584] to-[#6C63FF]">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 
+                bg-clip-text text-transparent bg-linear-to-r  
+                from-[#6C63FF] via-[#FF6584] to-[#6C63FF]">
                 {art.title}
             </h2>
 
             <div className="flex flex-col lg:flex-row gap-10">
-
                 <div className="lg:w-1/2 rounded-3xl overflow-hidden shadow-lg">
-                    <img src={art.image} alt={art.title} className="w-full h-[420px] object-cover" />
+                    <img
+                        src={art.image}
+                        alt={art.title}
+                        className="w-full h-[420px] object-cover"
+                    />
                 </div>
 
                 <div className="lg:w-1/2 space-y-4">
-
-                    <p className="text-gray-700 dark:text-gray-300 text-lg">{art.description}</p>
+                    <p className="text-gray-700 dark:text-gray-300 text-lg">
+                        {art.description}
+                    </p>
 
                     <p className="text-gray-600 dark:text-gray-300">
                         <span className="font-bold">Category:</span> {art.category}
@@ -123,19 +147,28 @@ const ArtworkDetails = () => {
                         <span className="font-bold">Visibility:</span> {art.visibility}
                     </p>
 
-                    {/* Likes */}
                     <p className="text-xl mt-4">
                         ❤️ <span className="font-semibold">{art.likes || 0}</span> likes
                     </p>
 
                     <div className="flex gap-4 mt-5">
-
-                        <button onClick={handleLike} disabled={likeLoading} className="px-5 py-2 rounded-xl text-white font-medium bg-linear-to-r from-[#6C63FF] to-[#FF6584] hover:opacity-90 transition">
+                        <button
+                            onClick={handleLike}
+                            disabled={likeLoading}
+                            className="px-5 py-2 rounded-xl text-white font-medium
+                                bg-linear-to-r from-[#6C63FF] to-[#FF6584]
+                                hover:opacity-90 transition cursor-pointer"
+                        >
                             {likeLoading ? "Liking..." : "Like"}
                         </button>
 
-                        <button onClick={handleAddToFavorites} className="px-5 py-2 rounded-xl text-white font-medium bg-linear-to-r from-[#6C63FF] to-[#FF6584] hover:opacity-90 transition">
-                            Add to Favorites
+                        <button
+                            onClick={handleAddToFavourites}
+                            className="px-5 py-2 rounded-xl text-white font-medium
+                                bg-linear-to-r from-[#6C63FF] to-[#FF6584]
+                                hover:opacity-90 transition cursor-pointer"
+                        >
+                            Add to Favourites
                         </button>
                     </div>
 
@@ -147,11 +180,13 @@ const ArtworkDetails = () => {
                         </p>
 
                         <p className="text-gray-600 dark:text-gray-300">
-                            Total artworks: <span className="font-bold">{artistArts.length}</span>
+                            Total artworks:{" "}
+                            <span className="font-bold">
+                                {artistArts.length}
+                            </span>
                         </p>
                     </div>
                 </div>
-
             </div>
         </div>
     );

@@ -45,8 +45,8 @@ const Navbar = () => {
                         My Gallery
                     </NavLink>
 
-                    <NavLink to="/favorites" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
-                        My Favorites
+                    <NavLink to="/favourites" className={({ isActive }) => (isActive ? activeClass : normalClass)}>
+                        My Favourites
                     </NavLink>
                 </div>
 
@@ -127,8 +127,8 @@ const Navbar = () => {
                                         My Gallery
                                     </NavLink>
 
-                                    <NavLink to="/favorites" onClick={() => setIsOpen(false)} className={({ isActive }) => (isActive ? activeClass : normalClass)}>
-                                        My Favorites
+                                    <NavLink to="/favourites" onClick={() => setIsOpen(false)} className={({ isActive }) => (isActive ? activeClass : normalClass)}>
+                                        My Favourites
                                     </NavLink>
                                 </>
                             )}
