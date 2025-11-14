@@ -30,7 +30,7 @@ const ArtworkDetails = () => {
         setLoading(true);
         let current = null;
 
-        fetch(`http://localhost:3000/arts/${id}`)
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${id}`)
             .then((res) => res.json())
             .then((data) => {
                 current = data;
@@ -38,7 +38,7 @@ const ArtworkDetails = () => {
 
                 if (user?.email) {
                     return fetch(
-                        `http://localhost:3000/favourites/check?email=${user.email}&artId=${id}`
+                        `${import.meta.env.VITE_FRONTEND_URL}/favourites/check?email=${user.email}&artId=${id}`
                     );
                 }
                 return { json: () => ({ exists: false }) };
@@ -47,7 +47,7 @@ const ArtworkDetails = () => {
             .then((fav) => {
                 if (fav.exists) setIsFavourite(true);
 
-                return fetch("http://localhost:3000/arts?visibility=Public");
+                return fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts?visibility=Public`);
             })
             .then((res) => res.json())
             .then((publicArts) => {
@@ -84,7 +84,7 @@ const ArtworkDetails = () => {
     const handleLike = () => {
         setLikeLoading(true);
 
-        fetch(`http://localhost:3000/arts/${id}/like`, { method: "PATCH" })
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${id}/like`, { method: "PATCH" })
             .then((res) => res.json())
             .then(() => {
                 setArt((prev) => ({
@@ -106,7 +106,7 @@ const ArtworkDetails = () => {
 
         setFavLoading(true);
 
-        fetch("http://localhost:3000/favourites", {
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}:3000/favourites`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

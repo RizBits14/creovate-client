@@ -16,7 +16,7 @@ const MyFavourites = () => {
         setLoading(true);
 
         // 1) Get favourites for this user
-        fetch(`http://localhost:3000/favourites?email=${user.email}`)
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites?email=${user.email}`)
             .then((res) => res.json())
             .then(async (favs) => {
                 if (!Array.isArray(favs) || favs.length === 0) {
@@ -29,7 +29,7 @@ const MyFavourites = () => {
                 const detailed = await Promise.all(
                     favs.map(async (fav) => {
                         try {
-                            const res = await fetch(`http://localhost:3000/arts/${fav.artworkId}`);
+                            const res = await fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${fav.artworkId}`);
                             const art = await res.json();
                             return {
                                 favId: fav._id,
@@ -60,7 +60,7 @@ const MyFavourites = () => {
     const handleUnfavourite = (item) => {
         setRemovingId(item.artworkId);
 
-        fetch(`http://localhost:3000/favourites/${item.artworkId}`, {
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites/${item.artworkId}`, {
             method: "DELETE",
         })
             .then((res) => res.json())

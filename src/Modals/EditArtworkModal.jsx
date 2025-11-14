@@ -20,7 +20,7 @@ const EditArtworkModal = ({ art, onClose, onUpdated }) => {
     const handleUpdate = () => {
         setLoading(true);
 
-        fetch(`http://localhost:3000/arts/${art._id}`, {
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${art._id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),

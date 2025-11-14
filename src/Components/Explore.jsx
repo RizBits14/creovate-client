@@ -10,7 +10,7 @@ const Explore = () => {
     const [category, setCategory] = useState("All");
 
     useEffect(() => {
-        fetch("http://localhost:3000/arts?visibility=Public")
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts?visibility=Public`)
             .then((res) => res.json())
             .then((data) => {
                 setArtworks(data);

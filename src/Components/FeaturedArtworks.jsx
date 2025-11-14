@@ -7,7 +7,7 @@ const FeaturedArtworks = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("http://localhost:3000/featured")
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/featured`)
             .then((res) => res.json())
             .then((data) => {
                 setArtworks(data);

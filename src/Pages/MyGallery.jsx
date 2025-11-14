@@ -17,7 +17,7 @@ const MyGallery = () => {
     const loadMyArts = useCallback(() => {
         if (!user) return;
 
-        fetch(`http://localhost:3000/my-arts?email=${user.email}`)
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/my-arts?email=${user.email}`)
             .then(res => res.json())
             .then(data => {
                 setMyArts(data);

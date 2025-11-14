@@ -8,7 +8,7 @@ const DeleteConfirmModal = ({ art, onClose, onDeleted }) => {
         setLoading(true);
 
         try {
-            const res = await fetch(`http://localhost:3000/arts/${art._id}`, {
+            const res = await fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${art._id}`, {
                 method: "DELETE",
             });
 

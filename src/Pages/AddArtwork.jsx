@@ -32,7 +32,7 @@ const AddArtwork = () => {
 
         setLoading(true);
 
-        fetch("http://localhost:3000/arts", {
+        fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newArt),
