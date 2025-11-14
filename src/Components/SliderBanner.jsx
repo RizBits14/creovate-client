@@ -3,6 +3,8 @@ import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { motion } from "framer-motion";
+import { Typewriter } from "react-simple-typewriter";
+
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -18,33 +20,33 @@ const SliderBanner = () => {
     const slides = [
         {
             img: sliderBanner1,
-            title: "Where Creativity Meets Canvas 🎨",
+            title: ["Where Creativity Meets Canvas 🎨", "Unleash Your Imagination", "Start Creating Today"],
             subtitle: "Explore breathtaking art pieces crafted by emerging artists.",
         },
         {
             img: sliderBanner2,
-            title: "Discover the Artists Behind the Magic ✨",
+            title: ["Discover the Artists Behind the Magic ✨", "Meet the Creator", "Art That Speaks"],
             subtitle: "Celebrate creativity and passion in every masterpiece.",
         },
         {
             img: sliderBanner3,
-            title: "Dream. Create. Inspire. 🌈",
-            subtitle: "Join a community where artists turn imagination into timeless art."
+            title: ["Dream. Create. Inspire. 🌈", "A World of Imagination", "Limitless Expression"],
+            subtitle: "Join a community where artists turn imagination into timeless art.",
         },
         {
             img: sliderBanner4,
-            title: "Colors That Speak Louder Than Words 🖌️",
-            subtitle: "Experience emotions painted through vivid hues and bold strokes."
+            title: ["Colors That Speak Louder Than Words 🖌️", "Vibrant. Bold. Emotional.", "Every Color Has a Story"],
+            subtitle: "Experience emotions painted through vivid hues and bold strokes.",
         },
         {
             img: sliderBanner5,
-            title: "Imagine Without Limits 🪄",
-            subtitle: "Step into a world where creativity flows beyond boundaries."
+            title: ["Imagine Without Limits 🪄", "Think. Design. Create.", "Art Beyond Boundaries"],
+            subtitle: "Step into a world where creativity flows beyond boundaries.",
         },
         {
             img: sliderBanner6,
-            title: "Every Brushstroke Tells a Story 💫",
-            subtitle: "Uncover the narratives hidden in the details of each artwork."
+            title: ["Every Brushstroke Tells a Story 💫", "Feel the Emotion", "Stories in Every Stroke"],
+            subtitle: "Uncover the narratives hidden in the details of each artwork.",
         },
     ];
 
@@ -52,7 +54,7 @@ const SliderBanner = () => {
         <div className="mt-6 md:mt-10 px-4 md:px-10">
             <Swiper
                 modules={[Autoplay, Navigation, Pagination]}
-                autoplay={{ delay: 4000, disableOnInteraction: false }}
+                autoplay={{ delay: 8000, disableOnInteraction: false }}
                 loop
                 navigation
                 pagination={{ clickable: true }}
@@ -61,7 +63,10 @@ const SliderBanner = () => {
             >
                 {slides.map((slide, index) => (
                     <SwiperSlide key={index}>
-                        <div className="h-[400px] md:h-[520px] bg-cover bg-center flex items-center justify-center roun relative" style={{ backgroundImage: `url(${slide.img})` }}>
+                        <div
+                            className="h-[400px] md:h-[520px] bg-cover bg-center flex items-center justify-center relative"
+                            style={{ backgroundImage: `url(${slide.img})` }}
+                        >
                             <div className="absolute inset-0 bg-linear-to-b from-black/40 to-black/70"></div>
 
                             <motion.div
@@ -71,17 +76,25 @@ const SliderBanner = () => {
                                 className="relative z-10 text-center text-white p-6 max-w-3xl"
                             >
                                 <motion.h1
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     transition={{ delay: 0.2, duration: 1 }}
-                                    className="text-3xl md:text-5xl font-extrabold tracking-wide mb-4 bg-clip-text text-transparent bg-linear-to-r from-[#6C63FF] via-[#FF6584] to-[#6C63FF]"
+                                    className="text-3xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-linear-to-r from-[#6C63FF] via-[#FF6584] to-[#6C63FF]"
                                 >
-                                    {slide.title}
+                                    <Typewriter
+                                        words={slide.title}
+                                        loop={true}
+                                        cursor
+                                        cursorStyle="|"
+                                        typeSpeed={70}
+                                        deleteSpeed={50}
+                                        delaySpeed={1500}
+                                    />
                                 </motion.h1>
 
                                 <motion.p
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     transition={{ delay: 0.4, duration: 1 }}
                                     className="text-lg md:text-xl text-gray-200 font-light"
                                 >
