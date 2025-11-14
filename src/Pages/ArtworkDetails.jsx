@@ -7,12 +7,16 @@ const ArtworkDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+
     const [art, setArt] = useState(null);
     const [artistArts, setArtistArts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [likeLoading, setLikeLoading] = useState(false);
     const [isFavourite, setIsFavourite] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
+
+    const defaultArtistPhoto =
+        "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
     useEffect(() => {
         if (!user) {
@@ -24,43 +28,36 @@ const ArtworkDetails = () => {
         if (!id) return;
 
         setLoading(true);
-
-        let currentArt = null;
+        let current = null;
 
         fetch(`http://localhost:3000/arts/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                currentArt = data;
+            .then((res) => res.json())
+            .then((data) => {
+                current = data;
                 setArt(data);
 
                 if (user?.email) {
-                    return fetch(`http://localhost:3000/favourites/check?email=${user.email}&artId=${id}`);
+                    return fetch(
+                        `http://localhost:3000/favourites/check?email=${user.email}&artId=${id}`
+                    );
                 }
                 return { json: () => ({ exists: false }) };
             })
-            .then(res => res.json())
-            .then(favData => {
-                if (favData.exists) {
-                    setIsFavourite(true);
-                }
+            .then((res) => res.json())
+            .then((fav) => {
+                if (fav.exists) setIsFavourite(true);
 
                 return fetch("http://localhost:3000/arts?visibility=Public");
             })
-            .then(res => res.json())
-            .then(allPublicArts => {
-                if (!currentArt) return;
-
-                const sameArtist = allPublicArts.filter(
-                    a => a.artist === currentArt.artist
+            .then((res) => res.json())
+            .then((publicArts) => {
+                const sameArtist = publicArts.filter(
+                    (a) => a.artist === current.artist
                 );
-
                 setArtistArts(sameArtist);
                 setLoading(false);
             })
-            .catch(err => {
-                console.error("Error fetching art:", err);
-                setLoading(false);
-            });
+            .catch(() => setLoading(false));
     }, [id, user]);
 
     if (loading) {
@@ -73,27 +70,30 @@ const ArtworkDetails = () => {
 
     if (!art) {
         return (
-            <p className="text-center mt-32 text-gray-600">
+            <p className="text-center mt-32 text-gray-600 dark:text-gray-300">
                 Artwork not found.
             </p>
         );
     }
 
+    const artistPhoto =
+        art.artistPhoto ||
+        (user?.email === art.email ? user?.photoURL : null) ||
+        defaultArtistPhoto;
+
     const handleLike = () => {
         setLikeLoading(true);
 
-        fetch(`http://localhost:3000/arts/${id}/like`, {
-            method: "PATCH",
-        })
-            .then(res => res.json())
+        fetch(`http://localhost:3000/arts/${id}/like`, { method: "PATCH" })
+            .then((res) => res.json())
             .then(() => {
-                setArt(prev => ({
+                setArt((prev) => ({
                     ...prev,
                     likes: (prev.likes || 0) + 1,
                 }));
                 toast.success("You liked this artwork!");
             })
-            .catch(() => toast.error("Failed to like."))
+            .catch(() => toast.error("Failed to like"))
             .finally(() => setLikeLoading(false));
     };
 
@@ -114,75 +114,68 @@ const ArtworkDetails = () => {
                 artworkId: id,
             }),
         })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success || data.already) {
-                    setIsFavourite(true);
-                    toast.success("Added to favourites!");
-                }
+            .then((res) => res.json())
+            .then(() => {
+                setIsFavourite(true);
+                toast.success("Added to favourites!");
             })
-            .catch(() => toast.error("Failed to add to favourites"))
+            .catch(() => toast.error("Failed to add"))
             .finally(() => setFavLoading(false));
     };
 
     return (
-        <div className="mt-28 px-4 md:px-10 max-w-5xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 
-                bg-clip-text text-transparent bg-linear-to-r  
-                from-[#6C63FF] via-[#FF6584] to-[#6C63FF]">
+        <div className="mt-28 px-4 md:px-10 max-w-7xl mx-auto">
+
+            <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-14
+                bg-clip-text text-transparent bg-linear-to-r 
+                from-[#6C63FF] via-[#FF6584] to-[#6C63FF] drop-shadow-lg">
                 {art.title}
             </h2>
 
-            <div className="flex flex-col lg:flex-row gap-10">
-                <div className="lg:w-1/2 rounded-3xl overflow-hidden shadow-lg">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+                <div className="rounded-3xl p-3 shadow-xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 flex justify-center items-center transition hover:scale-[1.01]">
                     <img
                         src={art.image}
                         alt={art.title}
-                        className="w-full h-[420px] object-cover"
+                        className="rounded-2xl w-full h-64 sm:h-80 md:h-[420px] lg:h-[500px] object-cover shadow-xl transition-all"
                     />
                 </div>
 
-                <div className="lg:w-1/2 space-y-4">
-                    <p className="text-gray-700 dark:text-gray-300 text-lg">
+                <div className="p-8 rounded-3xl shadow-xl bg-gray-900 text-gray-200 dark:bg-gray-800 
+                    border border-gray-700 hover:border-[#6C63FF] transition">
+
+                    <p className="text-gray-300 leading-relaxed text-lg mb-6 animate-fadeIn text-justify">
                         {art.description}
                     </p>
 
-                    <p className="text-gray-600 dark:text-gray-300">
-                        <span className="font-bold">Category:</span> {art.category}
+                    <div className="space-y-2 text-sm">
+                        <p><span className="font-bold text-white">Category:</span> {art.category}</p>
+                        <p><span className="font-bold text-white">Medium:</span> {art.medium}</p>
+
+                        {art.dimensions && (
+                            <p><span className="font-bold text-white">Dimensions:</span> {art.dimensions}</p>
+                        )}
+
+                        {art.price && (
+                            <p><span className="font-bold text-white">Price:</span> ${art.price}</p>
+                        )}
+
+                        <p><span className="font-bold text-white">Visibility:</span> {art.visibility}</p>
+                    </div>
+
+                    <p className="text-xl mt-6 flex items-center gap-2">
+                        <span className="text-pink-400 text-2xl animate-pulse">❤️</span>
+                        <span className="font-bold">{art.likes || 0}</span> likes
                     </p>
 
-                    <p className="text-gray-600 dark:text-gray-300">
-                        <span className="font-bold">Medium:</span> {art.medium}
-                    </p>
-
-                    {art.dimensions && (
-                        <p className="text-gray-600 dark:text-gray-300">
-                            <span className="font-bold">Dimensions:</span> {art.dimensions}
-                        </p>
-                    )}
-
-                    {art.price && (
-                        <p className="text-gray-600 dark:text-gray-300">
-                            <span className="font-bold">Price:</span> ${art.price}
-                        </p>
-                    )}
-
-                    <p className="text-gray-600 dark:text-gray-300">
-                        <span className="font-bold">Visibility:</span> {art.visibility}
-                    </p>
-
-                    <p className="text-xl mt-4">
-                        ❤️ <span className="font-semibold">{art.likes || 0}</span> likes
-                    </p>
-
-                    <div className="flex gap-4 mt-5">
-
+                    <div className="flex gap-5 mt-6">
                         <button
                             onClick={handleLike}
                             disabled={likeLoading}
-                            className="px-5 py-2 rounded-xl text-white font-medium
-                                bg-linear-to-r from-[#6C63FF] to-[#FF6584]
-                                hover:opacity-90 transition cursor-pointer"
+                            className="px-6 py-2.5 rounded-xl text-white font-semibold 
+                                bg-linear-to-r from-indigo-500 to-pink-500 
+                                hover:opacity-90 shadow-lg transition hover:scale-105"
                         >
                             {likeLoading ? "Liking..." : "Like"}
                         </button>
@@ -190,36 +183,39 @@ const ArtworkDetails = () => {
                         <button
                             onClick={handleAddToFavourites}
                             disabled={isFavourite || favLoading}
-                            className={`px-5 py-2 rounded-xl text-white font-medium transition 
+                            className={`px-6 py-2.5 rounded-xl text-white font-semibold 
+                                transition shadow-lg hover:scale-105
                                 ${isFavourite
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-linear-to-r from-[#6C63FF] to-[#FF6584] hover:opacity-90"
+                                    ? "bg-gray-500 cursor-not-allowed"
+                                    : "bg-linear-to-r from-pink-500 to-indigo-500 hover:opacity-90"
                                 }`}
                         >
-                            {isFavourite
-                                ? "Added ✓"
-                                : favLoading
-                                    ? "Adding..."
-                                    : "Add to Favourites"}
+                            {isFavourite ? "Added ✓" : favLoading ? "Adding..." : "Add to Favourites"}
                         </button>
                     </div>
 
-                    <div className="mt-8 p-5 rounded-2xl shadow bg-white dark:bg-gray-800">
-                        <h3 className="text-xl font-bold mb-3">Artist Info</h3>
+                    <div className="mt-10 p-5 bg-gray-800/70 border border-gray-700 rounded-2xl shadow-lg">
+                        <h3 className="text-xl font-bold mb-4">Artist Info</h3>
 
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">
-                            {art.artist}
-                        </p>
+                        <div className="flex items-center gap-4">
+                            <img
+                                src={artistPhoto}
+                                alt="Artist"
+                                className="w-14 h-14 rounded-full object-cover border border-gray-600"
+                            />
 
-                        <p className="text-gray-600 dark:text-gray-300">
-                            Total artworks:{" "}
-                            <span className="font-bold">
-                                {artistArts.length}
-                            </span>
-                        </p>
+                            <div>
+                                <p className="font-semibold text-gray-100">{art.artist}</p>
+                                <p className="text-gray-400 text-sm">
+                                    Total artworks: <span className="font-bold">{artistArts.length}</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
+
         </div>
     );
 };
