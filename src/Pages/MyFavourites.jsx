@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { AuthContext } from "../Provider/AuthContext";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -10,12 +10,17 @@ const MyFavourites = () => {
     const [loading, setLoading] = useState(true);
     const [removingId, setRemovingId] = useState(null);
 
+    const API = useMemo(
+        () => import.meta.env.VITE_API_URL || import.meta.env.VITE_FRONTEND_URL,
+        []
+    );
+
     const loadFavourites = useCallback(() => {
-        if (!user) return;
+        if (!user?.email) return;
 
         setLoading(true);
 
-        fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites?email=${user.email}`)
+        fetch(`${API}/favourites?email=${user.email}`)
             .then((res) => res.json())
             .then(async (favs) => {
                 if (!Array.isArray(favs) || favs.length === 0) {
@@ -27,13 +32,9 @@ const MyFavourites = () => {
                 const detailed = await Promise.all(
                     favs.map(async (fav) => {
                         try {
-                            const res = await fetch(`${import.meta.env.VITE_FRONTEND_URL}/arts/${fav.artworkId}`);
+                            const res = await fetch(`${API}/arts/${fav.artworkId}`);
                             const art = await res.json();
-                            return {
-                                favId: fav._id,
-                                artworkId: fav.artworkId,
-                                art,
-                            };
+                            return { favId: fav._id, artworkId: fav.artworkId, art };
                         } catch {
                             return null;
                         }
@@ -48,100 +49,126 @@ const MyFavourites = () => {
                 toast.error("Failed to load favourites.");
                 setLoading(false);
             });
-    }, [user]);
+    }, [API, user?.email]);
 
     useEffect(() => {
         loadFavourites();
     }, [loadFavourites]);
 
-    const handleUnfavourite = (item) => {
+    const handleUnfavourite = async (item) => {
+        if (!user?.email) return;
+
         setRemovingId(item.artworkId);
 
-        fetch(`${import.meta.env.VITE_FRONTEND_URL}/favourites/${item.artworkId}`, {
-            method: "DELETE",
-        })
-            .then((res) => res.json())
-            .then(() => {
-                toast.success("Removed from favourites");
-                loadFavourites();
-            })
-            .catch(() => {
-                toast.error("Failed to remove");
-            })
-            .finally(() => setRemovingId(null));
+        try {
+            // ✅ backend should delete with BOTH artworkId + email
+            const res = await fetch(
+                `${API}/favourites/${item.artworkId}?email=${encodeURIComponent(user.email)}`,
+                { method: "DELETE" }
+            );
+
+            if (!res.ok) throw new Error("Failed");
+
+            toast.success("Removed from favourites");
+            loadFavourites();
+        } catch {
+            toast.error("Failed to remove");
+        } finally {
+            setRemovingId(null);
+        }
     };
 
-    if (loading) {
-        return (
-            <div className="mt-28 flex justify-center py-16">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-        );
-    }
-
     return (
-        <div className="mt-28 max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10
-                bg-clip-text text-transparent bg-linear-to-r 
-                from-[#6C63FF] via-[#FF6584] to-[#6C63FF]">
-                My Favourites
-            </h2>
+        <div className="bg-base-100 border border-base-300 rounded-2xl p-6 md:p-10 shadow-sm">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold">My Favourites</h2>
+                    <p className="text-sm text-base-content/70 mt-2">
+                        Quick access to artworks you saved.
+                    </p>
+                </div>
 
-            {favItems.length === 0 && (
-                <p className="text-center text-gray-500">
-                    You haven&apos;t added any favourites yet.
-                </p>
+                <Link to="/explore" className="btn btn-outline btn-sm w-fit">
+                    Explore More
+                </Link>
+            </div>
+
+            {loading && (
+                <div className="mt-8 space-y-3">
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
+                </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {favItems.map((item) => {
-                    const art = item.art;
+            {!loading && favItems.length === 0 && (
+                <div className="mt-8 alert">
+                    <span className="text-sm">You haven’t added any favourites yet.</span>
+                </div>
+            )}
 
-                    return (
-                        <div
-                            key={item.favId}
-                            className="rounded-2xl shadow-md bg-white dark:bg-gray-800 overflow-hidden"
-                        >
-                            <img
-                                src={art.image}
-                                alt={art.title}
-                                className="h-64 w-full object-cover"
-                            />
+            {!loading && favItems.length > 0 && (
+                <div className="mt-8 overflow-x-auto">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Artwork</th>
+                                <th>Category</th>
+                                <th className="text-right">Likes</th>
+                                <th className="text-right">Actions</th>
+                            </tr>
+                        </thead>
 
-                            <div className="p-5 flex flex-col h-full">
-                                <h3 className="text-xl font-semibold text-white">Title: {art.title}</h3>
+                        <tbody>
+                            {favItems.map((item) => {
+                                const art = item.art;
+                                return (
+                                    <tr key={item.favId}>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div className="avatar">
+                                                    <div className="w-12 h-12 rounded-xl border border-base-300 overflow-hidden">
+                                                        <img src={art.image} alt={art.title} className="object-cover" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold">{art.title}</div>
+                                                    <div className="text-sm text-base-content/70 line-clamp-1">
+                                                        {art.artist || "—"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
 
-                                <p className="text-gray-600 dark:text-gray-300">
-                                    {art.artist}
-                                </p>
+                                        <td>{art.category || "—"}</td>
+                                        <td className="text-right">{art.likes || 0}</td>
 
-                                <p className="text-sm italic text-gray-500 dark:text-gray-400 mt-1">Category: {art.category}
-                                </p>
-
-                                <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-                                    ❤️ <span className="font-semibold">{art.likes || 0}</span> likes
-                                </p>
-
-                                <div className="mt-5 flex justify-between gap-3">
-                                    <Link to={`/art/${art._id}`} className="flex-1">
-                                        <button className="w-full btn btn-sm rounded-full bg-linear-to-r from-[#6C63FF] to-[#FF6584] text-white">
-                                            View Details
-                                        </button>
-                                    </Link>
-
-                                    <button
-                                        className="btn btn-sm rounded-full bg-red-500 text-white flex-1"
-                                        onClick={() => handleUnfavourite(item)}
-                                        disabled={removingId === item.artworkId}
-                                    >
-                                        {removingId === item.artworkId ? "Removing..." : "Unfavourite"}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                                        <td className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Link to={`/art/${art._id}`} className="btn btn-sm btn-outline">
+                                                    View
+                                                </Link>
+                                                <button
+                                                    className="btn btn-sm btn-error"
+                                                    onClick={() => handleUnfavourite(item)}
+                                                    disabled={removingId === item.artworkId}
+                                                >
+                                                    {removingId === item.artworkId ? (
+                                                        <span className="loading loading-spinner loading-xs" />
+                                                    ) : (
+                                                        "Remove"
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { AuthContext } from "../Provider/AuthContext";
 import toast from "react-hot-toast";
 import EditArtworkModal from "../Modals/EditArtworkModal";
 import DeleteConfirmModal from "../Modals/DeleteConfirmModal";
+import { Link } from "react-router-dom";
 
 const MyGallery = () => {
     const { user } = useContext(AuthContext);
@@ -14,21 +15,27 @@ const MyGallery = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const loadMyArts = useCallback(() => {
-        if (!user) return;
+    const API = useMemo(
+        () => import.meta.env.VITE_API_URL || import.meta.env.VITE_FRONTEND_URL,
+        []
+    );
 
-        fetch(`${import.meta.env.VITE_FRONTEND_URL}/my-arts?email=${user.email}`)
-            .then(res => res.json())
-            .then(data => {
-                setMyArts(data);
+    const loadMyArts = useCallback(() => {
+        if (!user?.email) return;
+
+        setLoading(true);
+        fetch(`${API}/my-arts?email=${user.email}`)
+            .then((res) => res.json())
+            .then((data) => {
+                setMyArts(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error("Error loading gallery:", err);
                 toast.error("Failed to load your artworks.");
                 setLoading(false);
             });
-    }, [user]);
+    }, [API, user?.email]);
 
     useEffect(() => {
         loadMyArts();
@@ -45,45 +52,92 @@ const MyGallery = () => {
     };
 
     return (
-        <div className="mt-28 max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 bg-clip-text text-transparent bg-linear-to-r  from-[#6C63FF] via-[#FF6584] to-[#6C63FF]">
-                My Gallery
-            </h2>
+        <div className="bg-base-100 border border-base-300 rounded-2xl p-6 md:p-10 shadow-sm">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold">My Gallery</h2>
+                    <p className="text-sm text-base-content/70 mt-2">
+                        Manage your artworks: edit details or delete items.
+                    </p>
+                </div>
 
+                <Link to="/dashboard/add-art" className="btn btn-primary btn-sm w-fit">
+                    Add Artwork
+                </Link>
+            </div>
+
+            {/* Loading skeleton */}
             {loading && (
-                <div className="flex justify-center py-16">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                <div className="mt-8 space-y-3">
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
+                    <div className="skeleton h-10 w-full" />
                 </div>
             )}
 
             {!loading && myArts.length === 0 && (
-                <p className="text-center text-gray-500">
-                    You have not added any artworks yet.
-                </p>
+                <div className="mt-8 alert">
+                    <span className="text-sm">
+                        You have not added any artworks yet. Click <span className="font-semibold">Add Artwork</span> to begin.
+                    </span>
+                </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {myArts.map((art) => (
-                    <div key={art._id} className="rounded-2xl shadow-md bg-white dark:bg-gray-800 overflow-hidden">
-                        <img src={art.image} alt={art.title} className="h-64 w-full object-cover"/>
+            {!loading && myArts.length > 0 && (
+                <div className="mt-8 overflow-x-auto">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Artwork</th>
+                                <th>Category</th>
+                                <th>Visibility</th>
+                                <th className="text-right">Likes</th>
+                                <th className="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {myArts.map((art) => (
+                                <tr key={art._id}>
+                                    <td>
+                                        <div className="flex items-center gap-3">
+                                            <div className="avatar">
+                                                <div className="w-12 h-12 rounded-xl border border-base-300 overflow-hidden">
+                                                    <img src={art.image} alt={art.title} className="object-cover" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="font-bold">{art.title}</div>
+                                                <div className="text-sm text-base-content/70 line-clamp-1">
+                                                    {art.medium || "—"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
 
-                        <div className="p-5">
-                            <h3 className="text-xl font-semibold text-white">Title: {art.title}</h3>
-                            <p className="text-gray-600 dark:text-gray-300">Category: {art.category}</p>
-
-                            <div className="mt-5 flex justify-between">
-                                <button className="btn btn-sm rounded-full bg-indigo-500 text-white" onClick={() => openEditModal(art)}>
-                                    Edit
-                                </button>
-
-                                <button className="btn btn-sm rounded-full bg-red-500 text-white" onClick={() => openDeleteModal(art)}>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                                    <td>{art.category || "—"}</td>
+                                    <td>
+                                        <span className={`badge ${art.visibility === "Public" ? "badge-success" : "badge-ghost"}`}>
+                                            {art.visibility || "—"}
+                                        </span>
+                                    </td>
+                                    <td className="text-right">{art.likes || 0}</td>
+                                    <td className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <button className="btn btn-sm btn-outline" onClick={() => openEditModal(art)}>
+                                                Edit
+                                            </button>
+                                            <button className="btn btn-sm btn-error" onClick={() => openDeleteModal(art)}>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {showEditModal && selectedArt && (
                 <EditArtworkModal
