@@ -13,8 +13,8 @@ const Login = () => {
 
     const DEMO = useMemo(
         () => ({
-            email: "demo@creovate.art",
-            password: "Creovate123",
+            email: import.meta.env.VITE_DEMO_EMAIL,
+            password: import.meta.env.VITE_DEMO_PASS,
         }),
         []
     );
