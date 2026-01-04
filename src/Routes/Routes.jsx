@@ -12,11 +12,12 @@ import Contact from "../Pages/Contact.jsx";
 
 import DashboardHome from "../Pages/Dashboard/DashboardHome.jsx";
 import Profile from "../Pages/Dashboard/Profile.jsx";
-import DashboardLayout from "../Layout/DashBoardLayout.jsx";
+// import DashboardLayout from "../Layout/DashBoardLayout.jsx";
 
 import AddArtwork from "../Pages/AddArtwork.jsx";
 import MyGallery from "../Pages/MyGallery.jsx";
 import MyFavourites from "../Pages/MyFavourites.jsx";
+import DashboardLayout from "../Layout/DashBoardLayout.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,12 +31,11 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
 
-      // Details page: publicly accessible (requirement)
       { path: "/art/:id", element: <ArtworkDetails /> },
     ],
   },
 
-  // ✅ Dashboard (private) — all CRUD pages live here
+  
   {
     path: "/dashboard",
     element: (
@@ -44,11 +44,11 @@ const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
-      { index: true, element: <DashboardHome /> }, // /dashboard
-      { path: "add-art", element: <AddArtwork /> }, // /dashboard/add-art
-      { path: "my-gallery", element: <MyGallery /> }, // /dashboard/my-gallery
-      { path: "favourites", element: <MyFavourites /> }, // /dashboard/favourites
-      { path: "profile", element: <Profile /> }, // /dashboard/profile
+      { index: true, element: <DashboardHome /> }, 
+      { path: "add-art", element: <AddArtwork /> }, 
+      { path: "my-gallery", element: <MyGallery /> }, 
+      { path: "favourites", element: <MyFavourites /> }, 
+      { path: "profile", element: <Profile /> }, 
     ],
   },
 
