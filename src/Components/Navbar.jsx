@@ -1,157 +1,350 @@
 /* eslint-disable no-unused-vars */
-import { useContext, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Provider/AuthContext";
 import { ThemeContext } from "../Provider/ThemeContext";
 import { FiMenu, FiX } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const { theme, toggleTheme } = useContext(ThemeContext);
     const [isOpen, setIsOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const navigate = useNavigate();
+    const profileRef = useRef(null);
 
-    const handleLogout = () => {
-        logout().catch((err) => console.log(err));
+    const closeAll = () => {
         setIsOpen(false);
+        setProfileOpen(false);
     };
 
-    const activeClass =
-        "text-transparent bg-clip-text bg-linear-to-r from-[#6C63FF] via-[#FF6584] to-[#6C63FF] font-semibold";
-    const normalClass =
-        "text-gray-700 dark:text-gray-200 hover:text-transparent hover:bg-clip-text hover:bg-linear-to-r hover:from-[#6C63FF] hover:via-[#FF6584] hover:to-[#6C63FF] transition-all duration-300";
+    const handleLogout = async () => {
+        try {
+            await logout();
+            closeAll();
+            navigate("/");
+        } catch (e) {
+            closeAll();
+        }
+    };
+
+    useEffect(() => {
+        const onKey = (e) => {
+            if (e.key === "Escape") closeAll();
+        };
+        const onClickOutside = (e) => {
+            if (!profileRef.current) return;
+            if (!profileRef.current.contains(e.target)) setProfileOpen(false);
+        };
+        window.addEventListener("keydown", onKey);
+        window.addEventListener("mousedown", onClickOutside);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            window.removeEventListener("mousedown", onClickOutside);
+        };
+    }, []);
+
+    const activeClass = "text-primary font-semibold";
+    const normalClass = "text-base-content/80 hover:text-primary transition-colors";
+    const linkClass = ({ isActive }) => (isActive ? activeClass : normalClass);
+
+    const commonLinks = useMemo(
+        () => [
+            { to: "/", label: "Home" },
+            { to: "/explore", label: "Explore" },
+            { to: "/about", label: "About" },
+            { to: "/contact", label: "Contact" },
+        ],
+        []
+    );
+
+    const privateLinks = useMemo(
+        () => [
+            { to: "/dashboard", label: "Dashboard" },
+            { to: "/dashboard/add-art", label: "Add Artwork" },
+            { to: "/dashboard/my-gallery", label: "My Gallery" },
+            { to: "/dashboard/favourites", label: "Favourites" },
+        ],
+        []
+    );
+
+    const navMotion = {
+        hidden: { opacity: 0, y: -10 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+        exit: { opacity: 0, y: -10, transition: { duration: 0.15 } },
+    };
+
+    const panelMotion = {
+        hidden: { opacity: 0, y: -8 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.18 } },
+        exit: { opacity: 0, y: -8, transition: { duration: 0.12 } },
+    };
+
+    const avatarSrc =
+        user?.photoURL || "https://cdn-icons-png.flaticon.com/128/17561/17561717.png";
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-white dark:bg-gray-900 shadow-xl backdrop-blur-md transition-colors duration-500">
-            <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-
+        <nav className="fixed top-0 z-50 w-full border-b border-base-300 bg-base-100/90 backdrop-blur upports-backdrop-filter:bg-base-100/70">
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 md:px-10">
                 <Link
                     to="/"
-                    className="text-3xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-[#6C63FF] via-[#FF6584] to-[#6C63FF] hover:scale-105 transition-transform duration-300"
+                    onClick={closeAll}
+                    className="inline-flex items-center gap-2 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    aria-label="Go to home"
                 >
-                    Creovate
+                    <span className="text-2xl font-extrabold tracking-tight text-base-content md:text-3xl">
+                        <span className="bg-linear-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                            Creo
+                        </span>
+                        <span className="text-base-content">vate</span>
+                    </span>
                 </Link>
 
-                <div className="hidden md:flex flex-1 justify-center space-x-8 font-medium text-lg">
-                    <NavLink to="/" className={({ isActive }) => isActive ? activeClass : normalClass}>Home</NavLink>
-                    <NavLink to="/explore" className={({ isActive }) => isActive ? activeClass : normalClass}>Explore</NavLink>
-                    <NavLink to="/add-art" className={({ isActive }) => isActive ? activeClass : normalClass}>Add Artwork</NavLink>
-                    <NavLink to="/my-gallery" className={({ isActive }) => isActive ? activeClass : normalClass}>My Gallery</NavLink>
-                    <NavLink to="/favourites" className={({ isActive }) => isActive ? activeClass : normalClass}>Favourites</NavLink>
+                <div className="hidden flex-1 items-center justify-center gap-8 md:flex">
+                    <div className="flex items-center gap-7 text-sm font-medium">
+                        {commonLinks.map((l) => (
+                            <NavLink key={l.to} to={l.to} onClick={closeAll} className={linkClass}>
+                                {l.label}
+                            </NavLink>
+                        ))}
+                        {user &&
+                            privateLinks.map((l) => (
+                                <NavLink key={l.to} to={l.to} onClick={closeAll} className={linkClass}>
+                                    {l.label}
+                                </NavLink>
+                            ))}
+                    </div>
                 </div>
 
-                <div className="hidden md:flex items-center space-x-4">
-
+                <div className="hidden items-center gap-3 md:flex">
                     <button
+                        type="button"
                         onClick={toggleTheme}
-                        className="relative w-12 h-6 flex items-center rounded-full bg-gray-300 dark:bg-gray-700 p-1 transition-all duration-300 shadow-inner"
+                        className="btn btn-ghost btn-sm h-11 w-11 rounded-xl"
+                        aria-label="Toggle theme"
+                        title="Toggle theme"
                     >
-                        <span
-                            className={`absolute w-6 h-6 rounded-full flex items-center justify-center bg-white dark:bg-gray-900 shadow-md text-yellow-500 dark:text-blue-300 transform transition-all duration-300`}
-                            style={{ left: theme === "light" ? "0px" : "24px" }}
-                        >
-                            {theme === "light" ? "🌞" : "🌜"}
-                        </span>
+                        <span className="text-lg">{theme === "light" ? "🌞" : "🌜"}</span>
                     </button>
 
                     {!user ? (
-                        <>
-                            <Link
-                                to="/login"
-                                className="px-4 py-2 rounded-full bg-linear-to-r from-[#6C63FF] to-[#FF6584] text-white font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
-                            >
+                        <div className="flex items-center gap-2">
+                            <Link to="/login" className="btn btn-ghost btn-sm h-11 rounded-xl bg-blue-600 text-black">
                                 Login
                             </Link>
-                            <Link
-                                to="/register"
-                                className="px-4 py-2 rounded-full border border-gray-400 text-gray-700 dark:text-gray-200 font-medium hover:border-[#6C63FF] hover:text-[#6C63FF] transition-all duration-300"
-                            >
+                            <Link to="/register" className="btn btn-outline btn-sm h-11 rounded-xl bg-blue-200 text-black">
                                 Register
                             </Link>
-                        </>
+                        </div>
                     ) : (
-                        <div className="dropdown dropdown-end">
-                            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                                <div className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-600 overflow-hidden">
-                                    <img src={user.photoURL || "https://cdn-icons-png.flaticon.com/128/17561/17561717.png"} alt="User Avatar" />
-                                </div>
-                            </label>
-                            <ul tabIndex={0} className="dropdown-content menu p-3 shadow-lg bg-white dark:bg-gray-800 rounded-xl w-52">
-                                <li className="font-semibold text-gray-700 dark:text-gray-200 border-b border-gray-300 dark:border-gray-700 pb-2">
-                                    {user.displayName || "User"}
-                                </li>
-                                <li>
-                                    <button onClick={handleLogout} className="text-red-500 dark:text-red-400 font-medium hover:underline">
-                                        Logout
-                                    </button>
-                                </li>
-                            </ul>
+                        <div className="relative" ref={profileRef}>
+                            <button
+                                type="button"
+                                onClick={() => setProfileOpen((v) => !v)}
+                                className="flex items-center gap-2 rounded-2xl border border-base-300 bg-base-100 px-2 py-2 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-base-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                aria-label="Open profile menu"
+                                aria-expanded={profileOpen}
+                            >
+                                <span className="relative h-9 w-9 overflow-hidden rounded-full border border-base-300">
+                                    <img src={avatarSrc} alt="User avatar" className="h-full w-full object-cover" />
+                                </span>
+                                <span className="hidden max-w-[140px] truncate text-sm font-semibold text-base-content sm:inline">
+                                    {user?.displayName || "User"}
+                                </span>
+                                <span
+                                    className={`hidden text-base-content/60 transition-transform sm:inline ${profileOpen ? "rotate-180" : ""
+                                        }`}
+                                >
+                                    ⌄
+                                </span>
+                            </button>
+
+                            <AnimatePresence>
+                                {profileOpen && (
+                                    <Motion.div
+                                        variants={panelMotion}
+                                        initial="hidden"
+                                        animate="show"
+                                        exit="exit"
+                                        className="absolute right-0 mt-3 w-64 overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-lg"
+                                    >
+                                        <div className="px-4 py-4">
+                                            <p className="text-xs text-base-content/60">Signed in as</p>
+                                            <p className="mt-1 truncate text-sm font-semibold text-base-content">
+                                                {user?.displayName || "User"}
+                                            </p>
+                                        </div>
+
+                                        <div className="h-px bg-base-300/70" />
+
+                                        <div className="p-2">
+                                            <Link
+                                                to="/dashboard/profile"
+                                                onClick={closeAll}
+                                                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                                            >
+                                                Profile <span className="text-base-content/50">→</span>
+                                            </Link>
+
+                                            <Link
+                                                to="/dashboard"
+                                                onClick={closeAll}
+                                                className="mt-1 flex items-center justify-between rounded-xl px-3 py-2 text-sm text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                                            >
+                                                Dashboard Home <span className="text-base-content/50">→</span>
+                                            </Link>
+
+                                            <button
+                                                type="button"
+                                                onClick={handleLogout}
+                                                className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-error transition-colors hover:bg-error/10"
+                                            >
+                                                Logout <span className="opacity-70">↩</span>
+                                            </button>
+                                        </div>
+                                    </Motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     )}
                 </div>
 
                 <div className="md:hidden">
-                    <button onClick={() => setIsOpen(!isOpen)} className="text-gray-700 dark:text-gray-200">
-                        {isOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setIsOpen((v) => !v);
+                            setProfileOpen(false);
+                        }}
+                        className="btn btn-ghost btn-sm h-11 w-11 rounded-xl"
+                        aria-label="Open menu"
+                        aria-expanded={isOpen}
+                    >
+                        {isOpen ? <FiX size={22} /> : <FiMenu size={22} />}
                     </button>
                 </div>
             </div>
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.25 }}
-                        className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg"
+                    <Motion.div
+                        variants={navMotion}
+                        initial="hidden"
+                        animate="show"
+                        exit="exit"
+                        className="md:hidden border-t border-base-300 bg-base-100"
                     >
-                        <div className="flex flex-col items-center py-6 space-y-4 text-lg">
-                            <button
-                                onClick={() => {
-                                    toggleTheme();
-                                    setIsOpen(false);
-                                }}
-                                className="relative w-12 h-6 flex items-center rounded-full bg-gray-300 dark:bg-gray-700 p-1 transition-all duration-300 shadow-inner"
-                            >
-                                <span
-                                    className={`absolute w-6 h-6 rounded-full flex items-center justify-center bg-white dark:bg-gray-900 shadow-md text-yellow-500 dark:text-blue-300 transform transition-all duration-300`}
-                                    style={{ left: theme === "light" ? "0px" : "24px" }}
-                                >
-                                    {theme === "light" ? "🌞" : "🌜"}
+                        <div className="mx-auto max-w-7xl px-4 py-6">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+                                    Menu
                                 </span>
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={toggleTheme}
+                                    className="btn btn-ghost btn-sm h-10 w-10 rounded-xl"
+                                    aria-label="Toggle theme"
+                                >
+                                    <span className="text-lg">{theme === "light" ? "🌞" : "🌜"}</span>
+                                </button>
+                            </div>
 
-                            {user && (
-                                <div className="flex flex-col items-center">
-                                    <img
-                                        src={user.photoURL || "https://cdn-icons-png.flaticon.com/128/17561/17561717.png"}
-                                        alt="User Avatar"
-                                        className="w-16 h-16 rounded-full border border-gray-300 dark:border-gray-600 shadow-md"
-                                    />
-                                    <p className="mt-2 font-semibold text-gray-700 dark:text-gray-200">{user.displayName || "User"}</p>
-                                </div>
-                            )}
+                            <div className="mt-4 grid gap-2">
+                                {commonLinks.map((l) => (
+                                    <NavLink
+                                        key={l.to}
+                                        to={l.to}
+                                        onClick={closeAll}
+                                        className={({ isActive }) =>
+                                            `rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
+                                            }`
+                                        }
+                                    >
+                                        {l.label}
+                                    </NavLink>
+                                ))}
 
-                            <NavLink to="/" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? activeClass : normalClass}>Home</NavLink>
-                            <NavLink to="/explore" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? activeClass : normalClass}>Explore</NavLink>
-                            {user && (
-                                <>
-                                    <NavLink to="/add-art" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? activeClass : normalClass}>Add Artwork</NavLink>
-                                    <NavLink to="/my-gallery" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? activeClass : normalClass}>My Gallery</NavLink>
-                                    <NavLink to="/favourites" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? activeClass : normalClass}>Favourites</NavLink>
-                                </>
-                            )}
+                                {user &&
+                                    privateLinks.map((l) => (
+                                        <NavLink
+                                            key={l.to}
+                                            to={l.to}
+                                            onClick={closeAll}
+                                            className={({ isActive }) =>
+                                                `rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
+                                                    ? "bg-primary/10 text-primary"
+                                                    : "text-base-content/80 hover:bg-base-200 hover:text-base-content"
+                                                }`
+                                            }
+                                        >
+                                            {l.label}
+                                        </NavLink>
+                                    ))}
+                            </div>
+
                             {!user ? (
-                                <div className="flex flex-col w-full items-center gap-3 px-6">
-                                    <Link to="/login" onClick={() => setIsOpen(false)} className="w-full px-4 py-2 rounded-full bg-linear-to-r from-[#6C63FF] to-[#FF6584] text-white font-semibold shadow-lg hover:scale-105 transition-transform duration-300">Login</Link>
-                                    <Link to="/register" onClick={() => setIsOpen(false)} className="w-full px-4 py-2 rounded-full border border-gray-400 text-gray-700 dark:text-gray-200 font-medium hover:border-[#6C63FF] hover:text-[#6C63FF] transition-all duration-300">Register</Link>
+                                <div className="mt-5 grid grid-cols-2 gap-3">
+                                    <Link
+                                        to="/login"
+                                        onClick={closeAll}
+                                        className="btn btn-ghost btn-sm h-11 rounded-xl"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        to="/register"
+                                        onClick={closeAll}
+                                        className="btn btn-outline btn-sm h-11 rounded-xl"
+                                    >
+                                        Register
+                                    </Link>
                                 </div>
                             ) : (
-                                <button onClick={handleLogout} className="text-red-500 dark:text-red-400 font-medium hover:underline">Logout</button>
+                                <div className="mt-5 rounded-2xl border border-base-300 bg-base-100 p-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="h-10 w-10 overflow-hidden rounded-full border border-base-300">
+                                            <img src={avatarSrc} alt="User avatar" className="h-full w-full object-cover" />
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-base-content">
+                                                {user?.displayName || "User"}
+                                            </p>
+                                            <p className="truncate text-xs text-base-content/60">
+                                                {user?.email || ""}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 grid gap-2">
+                                        <Link
+                                            to="/dashboard/profile"
+                                            onClick={closeAll}
+                                            className="rounded-xl px-4 py-3 text-sm font-medium text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                                        >
+                                            Profile
+                                        </Link>
+                                        <Link
+                                            to="/dashboard"
+                                            onClick={closeAll}
+                                            className="rounded-xl px-4 py-3 text-sm font-medium text-base-content/80 transition-colors hover:bg-base-200 hover:text-base-content"
+                                        >
+                                            Dashboard Home
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="rounded-xl px-4 py-3 text-left text-sm font-medium text-error transition-colors hover:bg-error/10"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                </div>
                             )}
                         </div>
-                    </motion.div>
+                    </Motion.div>
                 )}
             </AnimatePresence>
         </nav>
