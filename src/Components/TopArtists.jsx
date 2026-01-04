@@ -1,80 +1,127 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 const TopArtists = () => {
     const [artists, setArtists] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let active = true;
+        setLoading(true);
+
         fetch("/topartists.json")
             .then((res) => res.json())
             .then((data) => {
-                setArtists(data);
+                if (!active) return;
+                setArtists(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
-            .catch((err) => {
-                console.error("Error fetching artists:", err);
+            .catch(() => {
+                if (!active) return;
+                setArtists([]);
                 setLoading(false);
             });
+
+        return () => {
+            active = false;
+        };
     }, []);
 
-    if (loading) {
-        return (
-            <div className="flex justify-center py-16">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-        );
-    }
+    const skeletons = useMemo(() => Array.from({ length: 6 }, (_, i) => i), []);
 
     return (
-        <div className="mt-20 px-4 md:px-10 max-w-7xl mx-auto">
-            <h2
-                className="
-                    text-3xl md:text-4xl font-extrabold text-center mb-12 
-                    bg-clip-text text-transparent 
-                    bg-linear-to-r from-[#6C63FF] via-[#FF6584] to-[#6C63FF]
-                "
-            >
-                Top Artists of the Week
-            </h2>
+        <section className="px-4 md:px-10">
+            <div className="mx-auto max-w-7xl">
+                <div className="mx-auto max-w-2xl text-center">
+                    <h2 className="text-2xl font-extrabold tracking-tight text-base-content sm:text-3xl md:text-4xl">
+                        Top Artists of the Week
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-base-content/70 sm:text-base">
+                        Discover creators making waves this week and explore their latest uploads.
+                    </p>
+                </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {artists.map((artist, index) => (
-                    <div
-                        key={index}
-                        className="
-                            bg-white dark:bg-gray-800 
-                            rounded-3xl shadow-md hover:shadow-xl 
-                            transition-all duration-300 
-                            p-6 text-center hover:-translate-y-1
-                        "
-                    >
-                        <img
-                            src={artist.image}
-                            alt={artist.name}
-                            className="w-28 h-28 mx-auto rounded-full object-cover border-4 border-purple-300 mb-4"
-                        />
+                <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {loading ? (
+                        skeletons.map((i) => (
+                            <div
+                                key={i}
+                                className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm"
+                            >
+                                <div className="p-6 text-center">
+                                    <div className="mx-auto h-28 w-28 animate-pulse rounded-full bg-base-200" />
+                                    <div className="mt-5 h-5 w-2/3 mx-auto animate-pulse rounded-lg bg-base-200" />
+                                    <div className="mt-3 h-4 w-1/2 mx-auto animate-pulse rounded-lg bg-base-200" />
+                                    <div className="mt-6 h-11 w-full animate-pulse rounded-xl bg-base-200" />
+                                </div>
+                            </div>
+                        ))
+                    ) : artists.length === 0 ? (
+                        <div className="col-span-full rounded-2xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
+                            <h3 className="text-lg font-semibold text-base-content">No artists available</h3>
+                            <p className="mt-2 text-sm text-base-content/70">
+                                Please check back soon for weekly highlights.
+                            </p>
+                            <Link to="/explore" className="inline-block mt-5">
+                                <button className="btn btn-primary btn-sm h-11 rounded-xl">
+                                    Explore Artworks
+                                </button>
+                            </Link>
+                        </div>
+                    ) : (
+                        artists.map((artist, index) => {
+                            const name = artist?.name?.trim() || "Featured Artist";
+                            const artworksCount = Number.isFinite(Number(artist?.artworks))
+                                ? Number(artist.artworks)
+                                : 0;
 
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                            {artist.name}
-                        </h3>
+                            const img =
+                                artist?.image ||
+                                "https://images.unsplash.com/photo-1520975682030-32a6c62f9fba?auto=format&fit=crop&w=800&q=60";
 
-                        <p className="mt-2 text-gray-600 dark:text-gray-300">
-                            {artist.artworks} Artworks
-                        </p>
+                            const exploreHref = `/explore?search=${encodeURIComponent(name)}`;
 
-                        <button
-                            className="
-                                mt-5 px-5 py-2 rounded-xl text-sm font-medium
-                                text-white bg-linear-to-r from-[#6C63FF] to-[#FF6584]
-                                hover:opacity-90 transition-all duration-300
-                            "
-                        >
-                            View Profile
-                        </button>
-                    </div>
-                ))}
+                            return (
+                                <article
+                                    key={`${name}-${index}`}
+                                    className="group overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                                >
+                                    <div className="p-6 text-center">
+                                        <div className="relative mx-auto h-28 w-28">
+                                            <div className="absolute inset-0 rounded-full bg-linear-to-r from-primary/40 via-secondary/30 to-primary/40 blur-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                                            <img
+                                                src={img}
+                                                alt={name}
+                                                loading="lazy"
+                                                className="relative h-28 w-28 rounded-full object-cover border border-base-300"
+                                                onError={(e) => {
+                                                    e.currentTarget.src =
+                                                        "https://images.unsplash.com/photo-1520975682030-32a6c62f9fba?auto=format&fit=crop&w=800&q=60";
+                                                }}
+                                            />
+                                        </div>
+
+                                        <h3 className="mt-5 text-lg font-semibold text-base-content sm:text-xl line-clamp-1">
+                                            {name}
+                                        </h3>
+
+                                        <p className="mt-2 text-sm text-base-content/70">
+                                            {artworksCount} Artwork{artworksCount === 1 ? "" : "s"}
+                                        </p>
+
+                                        <Link to={exploreHref} className="mt-6 block">
+                                            <button className="btn btn-sm h-11 w-full rounded-xl border-0 text-white bg-linear-to-r from-primary via-secondary to-primary hover:opacity-95">
+                                                Explore Works
+                                            </button>
+                                        </Link>
+                                    </div>
+                                </article>
+                            );
+                        })
+                    )}
+                </div>
             </div>
-        </div>
+        </section>
     );
 };
 
