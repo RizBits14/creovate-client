@@ -5,7 +5,7 @@ import { AuthContext } from "../Provider/AuthContext";
 import { FiMenu, FiX } from "react-icons/fi";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
-const DashboardLayout = () => {
+const DashBoardLayout = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -311,4 +311,4 @@ const DashboardLayout = () => {
     );
 };
 
-export default DashboardLayout;
+export default DashBoardLayout;
